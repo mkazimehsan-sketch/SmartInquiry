@@ -1,0 +1,16 @@
+id,customer_name,email,order_id,message,expected_category,needs_human_review,note
+1,Ayesha Khan,ayesha.demo@example.com,,"Hi, how much does your standard package cost?",pricing,no,Clear pricing keyword
+2,Bilal Ahmed,bilal.demo@example.com,,"Do you offer any discounts if I buy 20 units?",pricing,no,Bulk discount is a pricing question
+3,Sara Malik,sara.demo@example.com,,"Can you send me your price list for the premium plan?",pricing,no,Price list request
+4,Usman Tariq,usman.demo@example.com,ORD-1042,"Where is my order ORD-1042? It was supposed to arrive yesterday.",order,no,Order status with order ID
+5,Hina Raza,hina.demo@example.com,ORD-2210,"I placed an order last week and want to track my shipment.",order,no,Tracking request
+6,Hamza Sheikh,hamza.demo@example.com,,"Has my order been dispatched yet?",order,yes,Order intent but no order ID -> ask for clarification
+7,Fatima Noor,fatima.demo@example.com,,"The app keeps crashing when I try to log in. Please help.",support,no,Technical problem
+8,Ali Raza,ali.demo@example.com,,"I forgot my password and the reset email never arrives.",support,no,Account/login issue
+9,Zainab Iqbal,zainab.demo@example.com,ORD-3307,"The product I received is damaged. I want a replacement.",support,yes,Damaged item; needs a human to approve replacement
+10,Omar Farooq,omar.demo@example.com,,"What are your opening hours on weekends?",other,yes,Not covered by templates -> uncertain/other
+11,Maria Joseph,maria.demo@example.com,,"Do you collaborate with schools for sponsorship events?",other,yes,Unsupported request
+12,Danish Ali,danish.demo@example.com,,"Your price is too high and your service is terrible. I want to complain.",other,yes,Pricing + complaint mixed -> review (per brief hint)
+13,Noor Fatima,noor.demo@example.com,ORD-4455,"How much is shipping, and where is my order ORD-4455?",other,yes,Mixes pricing + order -> ambiguous -> review
+14,Kamran Butt,kamran.demo@example.com,,"hello",other,yes,Too vague -> fallback asks for clarification
+15,Rabia Hassan,rabia.demo@example.com,,"Is there a cheaper plan? Also the dashboard won't load for me.",other,yes,Pricing + support -> ambiguous -> review
