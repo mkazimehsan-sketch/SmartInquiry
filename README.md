@@ -9,7 +9,7 @@ A human-reviewed workflow for a small business support assistant: accept a custo
 | Day | Milestone | Status |
 |-----|-----------|--------|
 | 1 (Mon 26 Oct) | Map the workflow, example inquiries, flowchart, intake form, repo | Done |
-| 2 (Tue 27 Oct) | Classification rules | Planned |
+| 2 (Tue 27 Oct) | Classification rules and test results | Done |
 | 3 (Wed 28 Oct) | Draft templates and fallback | Planned |
 | 4 (Thu 29 Oct) | Human review step and test matrix | Planned |
 | 5 (Fri 30 Oct) | Full demo, documentation, final handover | Planned |
@@ -30,6 +30,31 @@ See [`docs/flowchart.md`](docs/flowchart.md) (Mermaid) or [`docs/flowchart.svg`]
 | `other` | anything unclear, unsupported or mixed | Clarification fallback + flagged for human review |
 
 Rule from the brief: if a message mixes categories (e.g. pricing + complaint), mark it for review instead of guessing.
+
+## Day 2 deliverables - classification rules
+
+- `classifier.py` - rule-based classifier (no AI model). Rules run in priority order:
+  1. empty/too-short message -> `other` + review
+  2. complaint words (terrible, complain, unacceptable...) -> `other` + review
+  3. keywords from two or more categories (mixed) -> `other` + review
+  4. keywords from exactly one category -> that category
+  5. no keywords at all -> `other` (fallback) + review
+  6. extra review flags: damaged/faulty item, refund/replacement, order question without an order ID
+- `run_tests.py` - runs the classifier on a CSV and writes a results table with mismatches.
+- `data/unseen_tests.csv` - 12 extra messages written after the rules, to check the rules are not just memorising the samples.
+- `docs/test_results_*.md` - results (see below).
+
+### Test results
+
+| Test set | Result |
+|----------|--------|
+| `sample_inquiries.csv`, first run | 13/15 pass (2 mismatches) - `docs/test_results_run1_before_fix.md` |
+| `sample_inquiries.csv`, after fixes | 15/15 pass - `docs/test_results_sample.md` |
+| `unseen_tests.csv` (new messages) | 12/12 pass - `docs/test_results_unseen.md` |
+
+**Mismatches found and fixed:** the words "package" and "arrives" were counted as order keywords, so "how much does your standard package cost?" and "the reset email never arrives" were wrongly treated as mixed. Fixed by removing "package" and matching "arrive" only in phrases like "has not arrived".
+
+Run the tests: `python run_tests.py` and `python run_tests.py data/unseen_tests.csv unseen`
 
 ## Day 1 deliverables
 
@@ -57,8 +82,12 @@ Then open the local URL Streamlit prints (usually http://localhost:8501).
 
 ## Known limitations (Day 1)
 
-- Classification, drafting and review are not implemented yet (Days 2-4).
+- Drafting and review are not implemented yet (Days 3-4).
 - Validation is basic (regex checks), not full email verification.
+- The classifier only understands English keywords. Roman Urdu such as "Kitni qeemat hai?" falls back to `other` + review (safe, but not helpful).
+- "In order to join..." contains the word "order" and is treated as an order question (it is flagged for review because there is no order ID).
+- "Do you have a plan to open a new branch?" is wrongly classified as `pricing` without review, because "plan" is a pricing keyword. Keyword rules cannot understand meaning; a future fix is to require two signals or add more exceptions.
+- A negated complaint ("this is not a complaint") still counts as a complaint. That is safe because it goes to a human.
 
 ## Credits and AI assistance
 

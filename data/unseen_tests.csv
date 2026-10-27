@@ -1,0 +1,13 @@
+id,customer_name,email,order_id,message,expected_category,needs_human_review,note
+101,Test User,t1.demo@example.com,,"What is the cost of the annual subscription?",pricing,no,Plain pricing
+102,Test User,t2.demo@example.com,,"Can I get a quote for 50 units?",pricing,no,Quote request
+103,Test User,t3.demo@example.com,ORD-5001,"My parcel has not arrived yet, can you check the delivery status?",order,no,Order with ID
+104,Test User,t4.demo@example.com,,"Please track my shipment",order,yes,Order intent but no ID
+105,Test User,t5.demo@example.com,,"The website shows an error when I click pay.",support,no,Technical
+106,Test User,t6.demo@example.com,,"I want a refund for my purchase.",support,yes,Refund needs a person
+107,Test User,t7.demo@example.com,,"WHERE IS MY ORDER ORD-7788???",order,no,Uppercase and punctuation
+108,Test User,t8.demo@example.com,,"This is unacceptable, I want to speak to a manager.",other,yes,Complaint with no category keyword
+109,Test User,t9.demo@example.com,,"Are you hiring developers?",other,yes,Unsupported topic
+110,Test User,t10.demo@example.com,,"What is the delivery fee and can you help me log in?",other,yes,Mixed three categories
+111,Test User,t11.demo@example.com,,"Mera order kahan hai? ORD-9000",order,no,Roman Urdu message
+112,Test User,t12.demo@example.com,,"   ",other,yes,Blank message

@@ -1,9 +1,8 @@
-"""SmartInquiry - Day 1: intake form + validation.
+"""SmartInquiry - intake form + validation (Day 1) + classification (Day 2).
 
 Run with:  streamlit run app.py
 
-Day 1 scope: capture an inquiry as a structured record and validate it.
-Classification (Day 2), drafting (Day 3) and review (Day 4) come later.
+Drafting (Day 3) and human review (Day 4) come later.
 """
 import json
 import re
@@ -11,6 +10,8 @@ from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
+
+from classifier import classify
 
 DATA_DIR = Path(__file__).parent / "data"
 SUBMITTED_FILE = DATA_DIR / "submitted_inquiries.jsonl"  # git-ignored, local only
@@ -78,8 +79,17 @@ def main() -> None:
                 st.error(err)
         else:
             record = build_record(name, email, order_id, message, channel)
+            result = classify(message, order_id)
+            record["category"] = result.category
+            record["needs_review"] = result.needs_review
+            record["classifier_reason"] = result.reason
+            record["status"] = "classified"
             save_record(record)
-            st.success("Inquiry received and validated. Next steps (Days 2-4): classify -> draft -> human review.")
+            st.success("Inquiry received, validated and classified. Next steps (Days 3-4): draft -> human review.")
+            col_a, col_b = st.columns(2)
+            col_a.metric("Category", result.category.upper())
+            col_b.metric("Needs human review", "YES" if result.needs_review else "No")
+            st.caption(f"Why: {result.reason}")
             st.subheader("Structured record")
             st.json(record)
 
