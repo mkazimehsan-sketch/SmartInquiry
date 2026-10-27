@@ -60,9 +60,7 @@ def save_record(record: dict) -> None:
 def main() -> None:
     st.set_page_config(page_title="SmartInquiry", page_icon="📨")
     st.title("📨 SmartInquiry")
-    st.caption("Customer inquiry intake - Day 1 (human-reviewed workflow, never auto-sends)")
-    st.info("Use fake/demo data only. Do not enter real customer personal information.")
-
+   
     with st.form("inquiry_form", clear_on_submit=False):
         col1, col2 = st.columns(2)
         name = col1.text_input("Customer name")
@@ -85,7 +83,7 @@ def main() -> None:
             record["classifier_reason"] = result.reason
             record["status"] = "classified"
             save_record(record)
-            st.success("Inquiry received, validated and classified. Next steps (Days 3-4): draft -> human review.")
+            st.success("Inquiry received, validated and classified : draft -> human review.")
             col_a, col_b = st.columns(2)
             col_a.metric("Category", result.category.upper())
             col_b.metric("Needs human review", "YES" if result.needs_review else "No")
