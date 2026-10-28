@@ -10,7 +10,7 @@ A human-reviewed workflow for a small business support assistant: accept a custo
 |-----|-----------|--------|
 | 1 (Mon 26 Oct) | Map the workflow, example inquiries, flowchart, intake form, repo | Done |
 | 2 (Tue 27 Oct) | Classification rules and test results | Done |
-| 3 (Wed 28 Oct) | Draft templates and fallback | Planned |
+| 3 (Wed 28 Oct) | Draft templates and fallback | Done |
 | 4 (Thu 29 Oct) | Human review step and test matrix | Planned |
 | 5 (Fri 30 Oct) | Full demo, documentation, final handover | Planned |
 
@@ -30,6 +30,21 @@ See [`docs/flowchart.md`](docs/flowchart.md) (Mermaid) or [`docs/flowchart.svg`]
 | `other` | anything unclear, unsupported or mixed | Clarification fallback + flagged for human review |
 
 Rule from the brief: if a message mixes categories (e.g. pricing + complaint), mark it for review instead of guessing.
+
+## Day 3 deliverables - draft replies
+
+- `drafts.py` - builds an editable draft for each inquiry:
+  - **Category templates** for pricing, order and support. Anything the business must supply (prices, order status, troubleshooting steps) is a `[PLACEHOLDER]`, never an invented fact.
+  - **Fallback drafts** that ask for clarification or hand over to a person: `missing_order_id`, `mixed` topics, `complaint`, `unclear`.
+  - Damaged-item / refund messages get a note: "do not promise a refund or replacement until approved".
+  - An order ID is written into a draft only if the customer gave one.
+- `run_draft_tests.py` - generates drafts for all 27 test inquiries and runs automatic safety checks (no prices, no promises, greeting and sign-off present, no invented order ID, expected fallback used).
+- `docs/draft_examples.md` - every generated draft with its placeholders and safety result.
+- `app.py` - after submit, shows the category, an editable draft, a FALLBACK warning when relevant and the list of placeholders to fill.
+
+Result: **27/27 drafts pass safety checks.** Run: `python run_draft_tests.py`
+
+**Problems found and fixed:** (1) the "missing order number" fallback used the example `ABC-1234`, which looks like a real order ID, so it was replaced by a placeholder; (2) the placeholder detector missed placeholders containing lowercase letters; (3) the app saved the record before the draft was created, so `draft_kind` was missing from the saved record.
 
 ## Day 2 deliverables - classification rules
 
@@ -80,9 +95,11 @@ Then open the local URL Streamlit prints (usually http://localhost:8501).
 - Only fake/demo data is used. No real customer information, API keys or credentials are committed.
 - Submitted test records are written to `data/submitted_inquiries.jsonl`, which is git-ignored.
 
-## Known limitations (Day 1)
+## Known limitations
 
-- Drafting and review are not implemented yet (Days 3-4).
+- Human review/approval step is not implemented yet (Day 4).
+- Drafts are English only and generic; the business must fill in every `[PLACEHOLDER]`.
+- Safety checks only look for the patterns listed in `run_draft_tests.py`; they cannot catch every possible unsafe sentence, so a person must always read the draft.
 - Validation is basic (regex checks), not full email verification.
 - The classifier only understands English keywords. Roman Urdu such as "Kitni qeemat hai?" falls back to `other` + review (safe, but not helpful).
 - "In order to join..." contains the word "order" and is treated as an order question (it is flagged for review because there is no order ID).

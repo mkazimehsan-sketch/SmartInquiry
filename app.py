@@ -1,8 +1,8 @@
-"""SmartInquiry - intake form + validation (Day 1) + classification (Day 2).
+"""SmartInquiry - intake (Day 1) + classification (Day 2) + draft replies (Day 3).
 
 Run with:  streamlit run app.py
 
-Drafting (Day 3) and human review (Day 4) come later.
+Human review and approval (Day 4) come later.
 """
 import json
 import re
@@ -12,6 +12,7 @@ from pathlib import Path
 import streamlit as st
 
 from classifier import classify
+from drafts import generate_draft
 
 DATA_DIR = Path(__file__).parent / "data"
 SUBMITTED_FILE = DATA_DIR / "submitted_inquiries.jsonl"  # git-ignored, local only
@@ -60,7 +61,9 @@ def save_record(record: dict) -> None:
 def main() -> None:
     st.set_page_config(page_title="SmartInquiry", page_icon="📨")
     st.title("📨 SmartInquiry")
-   
+    st.caption("Customer inquiry intake - Day 3 (human-reviewed workflow, never auto-sends)")
+    st.info("Use fake/demo data only. Do not enter real customer personal information.")
+
     with st.form("inquiry_form", clear_on_submit=False):
         col1, col2 = st.columns(2)
         name = col1.text_input("Customer name")
@@ -81,13 +84,24 @@ def main() -> None:
             record["category"] = result.category
             record["needs_review"] = result.needs_review
             record["classifier_reason"] = result.reason
-            record["status"] = "classified"
-            save_record(record)
-            st.success("Inquiry received, validated and classified : draft -> human review.")
+            st.success("Inquiry received, validated, classified and drafted. Next step (Day 4): human review and approval.")
             col_a, col_b = st.columns(2)
             col_a.metric("Category", result.category.upper())
             col_b.metric("Needs human review", "YES" if result.needs_review else "No")
             st.caption(f"Why: {result.reason}")
+            draft = generate_draft(message, order_id, name)
+            record["draft_kind"] = draft.kind
+            record["status"] = "drafted"
+            save_record(record)  # saved once, after classification and drafting
+            st.subheader("Draft reply (editable)")
+            if draft.is_fallback:
+                st.warning("FALLBACK draft: the system is not sure, so it asks for clarification "
+                           "or hands over to a person.")
+            st.text_area("Edit the draft below. Nothing is sent automatically.", value=draft.text,
+                         height=320, key="draft_text")
+            if draft.placeholders:
+                st.info("Fill in or delete these placeholders before use: " + ", ".join(draft.placeholders))
+            st.caption("Reviewer note: " + draft.review_note)
             st.subheader("Structured record")
             st.json(record)
 
